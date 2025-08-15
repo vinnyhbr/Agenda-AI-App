@@ -6,10 +6,10 @@ import { AuthProvider } from './src/contexts/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 
+
 export default function App() {
   return (
-    // O AuthProvider deve vir primeiro para que o AppNavigator possa
-    // acessar o estado de autenticação.
+    
     <AuthProvider>
       <ThemeProvider>
         {/* O NavigationContainer é essencial para que o @react-navigation funcione. */}
