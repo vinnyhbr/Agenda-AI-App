@@ -5,8 +5,7 @@ import { ThemeProvider } from './src/contexts/ThemeContext';
 import { AuthProvider } from './src/contexts/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
-// O componente App agora é o responsável por "prover" os contextos
-// e o container de navegação para todo o aplicativo.
+
 export default function App() {
   return (
     // O AuthProvider deve vir primeiro para que o AppNavigator possa
