@@ -12,9 +12,9 @@ export default function App() {
     
     <AuthProvider>
       <ThemeProvider>
-        {/* O NavigationContainer é essencial para que o @react-navigation funcione. */}
+        {}
         <NavigationContainer>
-          {/* O AppNavigator contém a lógica de qual tela mostrar (Login ou Home). */}
+          {}
           <AppNavigator />
         </NavigationContainer>
       </ThemeProvider>
