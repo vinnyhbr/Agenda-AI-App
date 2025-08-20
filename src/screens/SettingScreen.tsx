@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Switch, SafeAreaView, TouchableOpacity } from '
 import { useTheme } from '../contexts/ThemeContext';
 import { SettingsScreenNavigationProp } from '../navigation/types';
 
-// Placeholder para o ícone de menu
+
 const MenuIcon: React.FC<{ color: string }> = ({ color }) => <Text style={{ color, fontSize: 28 }}>☰</Text>;
 
 type Props = { navigation: SettingsScreenNavigationProp };
