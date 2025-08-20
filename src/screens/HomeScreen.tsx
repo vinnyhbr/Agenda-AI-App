@@ -4,7 +4,6 @@ import { AuthContext } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { HomeScreenNavigationProp } from '../navigation/types';
 
-// Placeholder para o ícone de menu
 const MenuIcon: React.FC<{ color: string }> = ({ color }) => <Text style={{ color, fontSize: 28 }}>☰</Text>;
 
 type Props = { navigation: HomeScreenNavigationProp };
