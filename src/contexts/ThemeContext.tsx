@@ -1,43 +1,69 @@
-// src/contexts/ThemeContext.tsx
-
-import React, { createContext, useState, useContext, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
-import { lightTheme, darkTheme } from '../theme/theme';
+import { LIGHT_THEME, DARK_THEME, Theme } from '../constants/theme';
+import { useApp } from './AppContext';
 
-// Define a "forma" do nosso contexto
 interface ThemeContextType {
-  isDarkMode: boolean;
-  theme: typeof lightTheme; // O tema terá a estrutura do lightTheme
+  theme: Theme;
+  isDark: boolean;
   toggleTheme: () => void;
+  setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
 }
 
-// Cria o contexto
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Cria o Provedor, que vai envolver nosso app
-export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const systemScheme = useColorScheme(); // Detecta o tema do celular (light/dark)
-  const [isDarkMode, setIsDarkMode] = useState(systemScheme === 'dark');
+interface ThemeProviderProps {
+  children: ReactNode;
+}
+
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  const systemColorScheme = useColorScheme();
+  const { state, updateSettings } = useApp();
+  const [currentTheme, setCurrentTheme] = useState<Theme>(LIGHT_THEME);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const { theme: themeMode } = state.settings;
+    
+    let shouldUseDark = false;
+    
+    if (themeMode === 'dark') {
+      shouldUseDark = true;
+    } else if (themeMode === 'system') {
+      shouldUseDark = systemColorScheme === 'dark';
+    }
+    
+    setIsDark(shouldUseDark);
+    setCurrentTheme(shouldUseDark ? DARK_THEME : LIGHT_THEME);
+  }, [state.settings.theme, systemColorScheme]);
 
   const toggleTheme = () => {
-    setIsDarkMode(prevMode => !prevMode);
+    const newMode = isDark ? 'light' : 'dark';
+    updateSettings({ theme: newMode });
   };
 
-  // useMemo garante que o objeto de tema só seja recriado se o isDarkMode mudar
-  const theme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
+  const setThemeMode = (mode: 'light' | 'dark' | 'system') => {
+    updateSettings({ theme: mode });
+  };
+
+  const value: ThemeContextType = {
+    theme: currentTheme,
+    isDark,
+    toggleTheme,
+    setThemeMode,
+  };
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, theme, toggleTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
-};
+}
 
-// Cria um hook customizado para usar o tema mais facilmente
-export const useTheme = () => {
+export function useTheme() {
   const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme deve ser usado dentro de um ThemeProvider');
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
-};
+}
