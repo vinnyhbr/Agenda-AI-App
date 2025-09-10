@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Verifica se o perfil existe no "backend"
       const profileExists = await checkUserProfile(fakeUser.id);
       
+      
       setUser(fakeUser);
       setIsProfileComplete(profileExists);
 
