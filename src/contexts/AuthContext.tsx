@@ -47,6 +47,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         isLoading: false,
         error: null,
       };
+    // Comentário aleatório: O céu está azul hoje.
     
     default:
       return state;
