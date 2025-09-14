@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../types';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuthContext } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
@@ -25,20 +25,17 @@ interface Props {
 export default function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, state } = useAuth();
+  const { user, isLoading, error } = useAuthContext();
   const { theme } = useTheme();
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos');
-      return;
-    }
-
-    try {
-      await login(email.trim(), password);
-    } catch (error) {
-      // O erro já é tratado no contexto
-    }
+    Alert.alert(
+      'Login Tradicional',
+      'Esta funcionalidade foi substituída pelo login com Google. Use a tela anterior para fazer login.',
+      [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]
+    );
   };
 
   return (
@@ -107,25 +104,22 @@ export default function LoginScreen({ navigation }: Props) {
               </Text>
             </TouchableOpacity>
 
-            {state.error && (
-              <View style={[styles.errorContainer, { backgroundColor: theme.colors.error + '20' }]}>
-                <Text style={[styles.errorText, { color: theme.colors.error }]}>
-                  {state.error}
-                </Text>
-              </View>
-            )}
+            <View style={[styles.errorContainer, { backgroundColor: theme.colors.warning + '20' }]}>
+              <Text style={[styles.errorText, { color: theme.colors.warning }]}>
+                ⚠️ Login tradicional desabilitado. Use o login com Google.
+              </Text>
+            </View>
 
             <TouchableOpacity
               style={[
                 styles.loginButton,
-                { backgroundColor: theme.colors.primary },
-                state.isLoading && styles.disabledButton,
+                { backgroundColor: theme.colors.border, opacity: 0.5 },
               ]}
               onPress={handleLogin}
-              disabled={state.isLoading}
+              disabled={true}
             >
               <Text style={styles.loginButtonText}>
-                {state.isLoading ? 'Entrando...' : 'Entrar'}
+                Login Desabilitado
               </Text>
             </TouchableOpacity>
 

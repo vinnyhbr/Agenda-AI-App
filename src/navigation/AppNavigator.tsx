@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, ActivityIndicator } from 'react-native';
 
-import { useAuth } from '../contexts/AuthContext';
+import { useAuthContext } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { RootStackParamList } from '../types';
 
@@ -13,10 +13,10 @@ import MainNavigator from './MainNavigator';
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
-  const { state } = useAuth();
+  const { isAuthenticated, isLoading } = useAuthContext();
   const { theme } = useTheme();
 
-  if (state.isLoading) {
+  if (isLoading) {
     return (
       <View style={{
         flex: 1,
@@ -32,7 +32,7 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {state.isAuthenticated ? (
+        {isAuthenticated ? (
           <Stack.Screen name="Main" component={MainNavigator} />
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />

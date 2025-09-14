@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../types';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuthContext } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 
 type RegisterScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Register'>;
@@ -27,30 +27,17 @@ export default function RegisterScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const { register, state } = useAuth();
+  const { user, isLoading, error } = useAuthContext();
   const { theme } = useTheme();
 
   const handleRegister = async () => {
-    if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert('Erro', 'As senhas não coincidem');
-      return;
-    }
-
-    if (password.length < 6) {
-      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
-      return;
-    }
-
-    try {
-      await register(name.trim(), email.trim(), password);
-    } catch (error) {
-      // O erro já é tratado no contexto
-    }
+    Alert.alert(
+      'Registro Tradicional',
+      'Esta funcionalidade foi substituída pelo login com Google. Use a tela anterior para fazer login.',
+      [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]
+    );
   };
 
   return (
@@ -148,25 +135,22 @@ export default function RegisterScreen({ navigation }: Props) {
               />
             </View>
 
-            {state.error && (
-              <View style={[styles.errorContainer, { backgroundColor: theme.colors.error + '20' }]}>
-                <Text style={[styles.errorText, { color: theme.colors.error }]}>
-                  {state.error}
-                </Text>
-              </View>
-            )}
+            <View style={[styles.errorContainer, { backgroundColor: theme.colors.warning + '20' }]}>
+              <Text style={[styles.errorText, { color: theme.colors.warning }]}>
+                ⚠️ Registro tradicional desabilitado. Use o login com Google.
+              </Text>
+            </View>
 
             <TouchableOpacity
               style={[
                 styles.registerButton,
-                { backgroundColor: theme.colors.primary },
-                state.isLoading && styles.disabledButton,
+                { backgroundColor: theme.colors.border, opacity: 0.5 },
               ]}
               onPress={handleRegister}
-              disabled={state.isLoading}
+              disabled={true}
             >
               <Text style={styles.registerButtonText}>
-                {state.isLoading ? 'Criando conta...' : 'Criar conta'}
+                Registro Desabilitado
               </Text>
             </TouchableOpacity>
 
