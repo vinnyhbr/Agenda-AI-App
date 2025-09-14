@@ -59,9 +59,9 @@ export default function WelcomeScreen({ navigation }: Props) {
         <View style={styles.buttons}>
           <TouchableOpacity
             style={[styles.primaryButton, { backgroundColor: theme.colors.primary }]}
-            onPress={() => navigation.navigate('Register')}
+            onPress={() => navigation.navigate('OAuth2Login')}
           >
-            <Text style={styles.primaryButtonText}>Começar Agora</Text>
+            <Text style={styles.primaryButtonText}>Entrar com Google</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -69,7 +69,7 @@ export default function WelcomeScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('Login')}
           >
             <Text style={[styles.secondaryButtonText, { color: theme.colors.text }]}>
-              Já tenho uma conta
+              Login tradicional
             </Text>
           </TouchableOpacity>
         </View>

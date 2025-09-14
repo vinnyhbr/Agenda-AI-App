@@ -1,45 +1,61 @@
-// Tipos principais da aplicação
+// Tipos principais da aplicação baseados na API
 
 export interface User {
-  id: string;
-  name: string;
+  id: number;
   email: string;
-  avatar?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  name: string;
+  profilePictureUrl?: string;
+  isActive: boolean;
+  createdAt: string;
 }
 
-export interface Event {
-  id: string;
+export interface CalendarEvent {
+  id: number;
+  googleEventId?: string;
   title: string;
   description?: string;
-  startDate: Date;
-  endDate: Date;
-  isAllDay: boolean;
-  categoryId: string;
-  userId: string;
+  startTime: string;
+  endTime: string;
   location?: string;
-  reminders: Reminder[];
-  createdAt: Date;
-  updatedAt: Date;
+  allDay: boolean;
+  status: 'CONFIRMED' | 'TENTATIVE' | 'CANCELLED';
+  reminderMinutes?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface Category {
-  id: string;
-  name: string;
-  color: string;
-  icon?: string;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
+export interface CreateEventRequest {
+  title: string;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  allDay: boolean;
+  reminderMinutes?: number;
 }
 
-export interface Reminder {
-  id: string;
-  eventId: string;
-  type: 'notification' | 'email';
-  minutesBefore: number;
-  isActive: boolean;
+export interface ChatMessage {
+  id: number;
+  message: string;
+  response: string;
+  type: 'USER_MESSAGE' | 'SYSTEM_MESSAGE';
+  status: 'PENDING' | 'COMPLETED' | 'FAILED';
+  actionPerformed?: string;
+  calendarEventId?: string;
+  createdAt: string;
+}
+
+export interface SendMessageRequest {
+  message: string;
+}
+
+export interface AuthStatus {
+  authenticated: boolean;
+  user?: {
+    id: number;
+    email: string;
+    name: string;
+  };
 }
 
 export interface AppSettings {
@@ -71,6 +87,7 @@ export type RootStackParamList = {
 export type AuthStackParamList = {
   Welcome: undefined;
   Login: undefined;
+  OAuth2Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
 };
@@ -91,9 +108,19 @@ export interface ApiResponse<T> {
 }
 
 export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
+  content: T[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface ApiError {
+  message: string;
+  status: number;
+  timestamp: string;
 }

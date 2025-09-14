@@ -1,18 +1,63 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuthContext } from '../../contexts/AuthContext';
+import { useCalendar } from '../../hooks/useCalendar';
+import { CalendarEvent } from '../../types';
 
 export default function CalendarScreen() {
   const { theme } = useTheme();
-  const { logout } = useAuth();
+  const { logout, user } = useAuthContext();
+  const { events, isLoading, error, refreshEvents, syncWithGoogle } = useCalendar();
+
+  const handleSync = async () => {
+    try {
+      const today = new Date();
+      const startTime = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
+      const endTime = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString();
+
+      await syncWithGoogle(startTime, endTime);
+      Alert.alert('Sucesso', 'Calendário sincronizado com Google!');
+    } catch (error: any) {
+      Alert.alert('Erro', 'Erro ao sincronizar com Google Calendar');
+    }
+  };
+
+  const formatEventTime = (event: CalendarEvent) => {
+    const start = new Date(event.startTime);
+    const end = new Date(event.endTime);
+
+    if (event.allDay) {
+      return 'Dia todo';
+    }
+
+    return `${start.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })} - ${end.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })}`;
+  };
+
+  const formatEventDate = (event: CalendarEvent) => {
+    const date = new Date(event.startTime);
+    return date.toLocaleDateString('pt-BR', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short'
+    });
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -26,32 +71,72 @@ export default function CalendarScreen() {
       </View>
 
       <View style={styles.content}>
+        {/* Header com informações do usuário */}
         <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
           <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
-            📅 Calendário Inteligente
+            Olá, {user?.name || 'Usuário'}! 👋
           </Text>
           <Text style={[styles.cardDescription, { color: theme.colors.textSecondary }]}>
-            Visualize seus eventos de forma organizada e intuitiva
+            Bem-vindo ao seu calendário inteligente
           </Text>
+          <TouchableOpacity
+            style={[styles.syncButton, { backgroundColor: theme.colors.primary }]}
+            onPress={handleSync}
+          >
+            <Ionicons name="sync" size={16} color="#FFFFFF" />
+            <Text style={styles.syncButtonText}>Sincronizar com Google</Text>
+          </TouchableOpacity>
         </View>
 
+        {/* Lista de eventos */}
         <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
           <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
-            🎯 Próximos Eventos
+            📅 Seus Eventos
           </Text>
-          <Text style={[styles.cardDescription, { color: theme.colors.textSecondary }]}>
-            Nenhum evento agendado para hoje
-          </Text>
+
+          {error && (
+            <Text style={[styles.errorText, { color: theme.colors.error }]}>
+              {error}
+            </Text>
+          )}
+
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={theme.colors.primary} />
+              <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+                Carregando eventos...
+              </Text>
+            </View>
+          ) : events.length > 0 ? (
+            <ScrollView style={styles.eventsList}>
+              {events.map((event) => (
+                <View key={event.id} style={[styles.eventItem, { borderColor: theme.colors.border }]}>
+                  <View style={styles.eventHeader}>
+                    <Text style={[styles.eventTitle, { color: theme.colors.text }]}>
+                      {event.title}
+                    </Text>
+                    <Text style={[styles.eventDate, { color: theme.colors.textSecondary }]}>
+                      {formatEventDate(event)}
+                    </Text>
+                  </View>
+                  <Text style={[styles.eventTime, { color: theme.colors.textSecondary }]}>
+                    {formatEventTime(event)}
+                  </Text>
+                  {event.location && (
+                    <Text style={[styles.eventLocation, { color: theme.colors.textSecondary }]}>
+                      📍 {event.location}
+                    </Text>
+                  )}
+                </View>
+              ))}
+            </ScrollView>
+          ) : (
+            <Text style={[styles.cardDescription, { color: theme.colors.textSecondary }]}>
+              Nenhum evento encontrado. Que tal criar um novo?
+            </Text>
+          )}
         </View>
 
-        <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
-            📊 Estatísticas
-          </Text>
-          <Text style={[styles.cardDescription, { color: theme.colors.textSecondary }]}>
-            0 eventos este mês
-          </Text>
-        </View>
       </View>
 
       <TouchableOpacity
@@ -118,5 +203,67 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+  },
+  syncButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginTop: 8,
+  },
+  syncButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  errorText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginVertical: 8,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+  },
+  loadingText: {
+    marginLeft: 8,
+    fontSize: 14,
+  },
+  eventsList: {
+    maxHeight: 200,
+    marginTop: 8,
+  },
+  eventItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    marginBottom: 8,
+    borderRadius: 8,
+  },
+  eventHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  eventTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+  },
+  eventDate: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  eventTime: {
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  eventLocation: {
+    fontSize: 12,
   },
 });
